@@ -1,3 +1,26 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nahraj fotky</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>📸 Nahraj svoje fotky zo svadby</h1>
+
+  <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="photos" multiple required>
+    <button type="submit">Nahrať</button>
+  </form>
+
+  <p id="message"></p>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
+
 <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
   <input type="file" name="photos" multiple required>
   <button type="submit">Nahrať</button>
