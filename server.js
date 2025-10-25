@@ -18,6 +18,11 @@ const s3 = new S3Client({
   }
 });
 
+app.get("/upload", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "upload.html"));
+});
+
+
 // ✅ 2. Upload endpoint
 app.post("/upload", upload.array("photos"), async (req, res) => {
   try {
