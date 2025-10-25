@@ -111,6 +111,7 @@ app.get('/admin', (req, res) => {
 // Health check
 app.get('/healthz', (_, res) => res.json({ ok: true }));
 
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Uploader running on port ${PORT}`);
 });
