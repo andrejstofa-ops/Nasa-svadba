@@ -108,6 +108,14 @@ app.get('/admin', (req, res) => {
   ].join('\n'));
 });
 
+import path from "path";
+app.use(express.static("public"));
+
+app.get("/upload", (req, res) => {
+  res.sendFile(path.resolve("public/upload.html"));
+});
+
+
 // Health check
 app.get('/healthz', (_, res) => res.json({ ok: true }));
 
