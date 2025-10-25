@@ -1,1 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Photos</title>
+</head>
+<body style="font-family: sans-serif; text-align: center; margin-top: 50px;">
+  <h2>📸 Nahrajte svoje fotky</h2>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" name="photos" multiple><br><br>
+    <button type="submit">Odoslať</button>
+  </form>
+  <p id="status"></p>
 
+  <script>
+  document.getElementById('uploadForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const files = e.target.photos.files;
+    const formData = new FormData();
+    for (let f of files) formData.append('photos', f);
+    const res = await fetch(window.location.href, { method: 'POST', body: formData });
+    document.getElementById('status').textContent = res.ok ? '✅ Hotovo! Ďakujeme ❤️' : '❌ Chyba pri nahrávaní';
+  };
+  </script>
+</body>
+</html>
