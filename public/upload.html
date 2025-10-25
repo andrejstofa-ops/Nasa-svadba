@@ -1,29 +1,32 @@
-<!DOCTYPE html>
-<html lang="sk">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nahraj fotky 📸</title>
-</head>
-<body style="font-family:sans-serif; text-align:center; margin-top:40px;">
-  <h2>Nahraj fotky zo svadby 💍</h2>
-  <form id="form" enctype="multipart/form-data">
-    <input type="file" name="photos" multiple><br><br>
-    <button type="submit">Odoslať</button>
-  </form>
-  <p id="status"></p>
+<form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+  <input type="file" name="photos" multiple required>
+  <button type="submit">Nahrať</button>
+</form>
 
-  <script>
-  const form = document.getElementById('form');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const files = form.photos.files;
-    if (!files.length) return alert("Vyber aspoň jednu fotku!");
-    const fd = new FormData();
-    for (let f of files) fd.append("photos", f);
-    const res = await fetch(window.location.href, { method: "POST", body: fd });
-    document.getElementById("status").textContent = res.ok ? "✅ Hotovo! Ďakujeme ❤️" : "❌ Chyba pri nahrávaní.";
-  });
-  </script>
-</body>
-</html>
+<p id="message"></p>
+
+<script>
+document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const formData = new FormData(form);
+
+  const params = new URLSearchParams(window.location.search);
+  const event = params.get('event') || 'default';
+  const token = params.get('token') || 'DEV';
+
+  try {
+    const res = await fetch(`/upload?event=${event}&token=${token}`, {
+      method: 'POST',
+      body: formData
+    });
+    if (res.ok) {
+      document.getElementById('message').textContent = '✅ Hotovo, ďakujeme!';
+    } else {
+      document.getElementById('message').textContent = '❌ Chyba pri nahrávaní.';
+    }
+  } catch (err) {
+    document.getElementById('message').textContent = '❌ Chyba: ' + err.message;
+  }
+});
+</script>
