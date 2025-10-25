@@ -1,113 +1,29 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="sk">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Nahrať fotky</title>
-  <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; padding: 20px; max-width: 640px; margin: auto; }
-    .card { border: 1px solid #ddd; border-radius: 16px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
-    .row { margin-top: 12px; }
-    button { padding: 12px 16px; border-radius: 12px; border: 1px solid #ddd; cursor: pointer; }
-    #progress { height: 12px; background: #eee; border-radius: 8px; overflow: hidden; margin-top: 8px; }
-    #bar { height: 100%; width: 0%; background: #4CAF50; transition: width .2s; }
-    .hidden { display: none; }
-    .thumb { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; margin-right: 8px; border: 1px solid #ddd; }
-    .thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nahraj fotky 📸</title>
 </head>
-<body>
-  <div class="card">
-    <h2>🎉 Nahraj svoje fotky</h2>
-    <p>Ďakujeme! Odfoť alebo vyber fotky a odošli. Nahrávanie je anonymné a bezpečné.</p>
-    <label class="row">
-      <input id="files" type="file" accept="image/*" multiple />
-    </label>
-    <div id="progress" class="hidden"><div id="bar"></div></div>
-    <div class="row">
-      <button id="send">Odoslať fotky</button>
-    </div>
-    <div id="thumbs" class="thumbs"></div>
-    <p class="row" style="font-size: 12px; color: #666">
-      Nahraním súhlasíš so spracovaním fotiek pre účely tejto udalosti.
-    </p>
-  </div>
+<body style="font-family:sans-serif; text-align:center; margin-top:40px;">
+  <h2>Nahraj fotky zo svadby 💍</h2>
+  <form id="form" enctype="multipart/form-data">
+    <input type="file" name="photos" multiple><br><br>
+    <button type="submit">Odoslať</button>
+  </form>
+  <p id="status"></p>
 
   <script>
-    const qs = new URLSearchParams(location.search);
-    const eventId = qs.get('event') || 'wedding2025';
-    const token = qs.get('token') || 'DEV';
-
-    const input = document.getElementById('files');
-    const send = document.getElementById('send');
-    const progress = document.getElementById('progress');
-    const bar = document.getElementById('bar');
-    const thumbs = document.getElementById('thumbs');
-
-    input.addEventListener('change', () => {
-      thumbs.innerHTML = '';
-      for (const file of input.files) {
-        const img = document.createElement('img');
-        img.className = 'thumb';
-        img.src = URL.createObjectURL(file);
-        thumbs.appendChild(img);
-      }
-    });
-
-    async function uploadOne(file, idx, total) {
-      // Ask server for presigned URL
-      const q = new URL('/api/get-presigned', location.origin);
-      q.searchParams.set('token', token);
-      q.searchParams.set('event', eventId);
-      q.searchParams.set('filename', file.name);
-      q.searchParams.set('contentType', file.type || 'image/jpeg');
-
-      const r = await fetch(q);
-      if (!r.ok) throw new Error('Presign failed');
-      const { uploadUrl } = await r.json();
-
-      // Upload directly to S3
-      const res = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type || 'application/octet-stream' },
-        body: file
-      });
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error('Upload failed: ' + txt);
-      }
-
-      const pct = Math.round(((idx + 1) / total) * 100);
-      bar.style.width = pct + '%';
-    }
-
-    send.addEventListener('click', async () => {
-      const files = Array.from(input.files || []);
-      if (files.length === 0) { alert('Vyber aspoň jednu fotku'); return; }
-      progress.classList.remove('hidden');
-      bar.style.width = '0%';
-      send.disabled = true;
-
-      try {
-        let i = 0;
-        for (const f of files) {
-          // optional: client-side size limit
-          if (f.size > 25 * 1024 * 1024) throw new Error('Súbor je príliš veľký (max 25 MB)');
-          await uploadOne(f, i, files.length);
-          i++;
-        }
-        alert('Hotovo! Ďakujeme ❤️');
-        input.value = '';
-        thumbs.innerHTML = '';
-        bar.style.width = '0%';
-        progress.classList.add('hidden');
-      } catch (e) {
-        console.error(e);
-        alert(e.message || 'Chyba pri nahrávaní');
-      } finally {
-        send.disabled = false;
-      }
-    });
+  const form = document.getElementById('form');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const files = form.photos.files;
+    if (!files.length) return alert("Vyber aspoň jednu fotku!");
+    const fd = new FormData();
+    for (let f of files) fd.append("photos", f);
+    const res = await fetch(window.location.href, { method: "POST", body: fd });
+    document.getElementById("status").textContent = res.ok ? "✅ Hotovo! Ďakujeme ❤️" : "❌ Chyba pri nahrávaní.";
+  });
   </script>
 </body>
 </html>
